@@ -10,6 +10,7 @@ ENV MAX_THREADS=4 \
     ENABLE_ROOT_USER=0 \ 
     SPLITTER_PORT=3306 \
     ROUTER_PORT=3307 \
+    ROUTER_OPTIONS="synced" \
     CLI_PORT=6603 \
     CONNECTION_TIMEOUT=600 \
     PERSIST_POOLMAX=0 \
@@ -20,6 +21,10 @@ ENV MAX_THREADS=4 \
 
 # We copy our config creator script to the container
 COPY docker-entrypoint.sh /
+COPY getbackendservers.sh /
+COPY healthcheck.sh /
+#RUN chmod +x /getbackendservers.sh /healthcheck.sh
+
 
 # We expose our set Listener Ports
 EXPOSE $SPLITTER_PORT $ROUTER_PORT $CLI_PORT
@@ -27,5 +32,8 @@ EXPOSE $SPLITTER_PORT $ROUTER_PORT $CLI_PORT
 # We define the config creator as entrypoint
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
+HEALTHCHECK --interval=5s CMD /healthcheck.sh
+
 # We startup MaxScale as default command
-CMD ["/usr/bin/maxscale","--nodaemon"]
+CMD ["/usr/bin/maxscale", "--nodaemon"]
+#"--log=stdout",
